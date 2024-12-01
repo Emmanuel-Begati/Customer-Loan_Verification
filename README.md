@@ -12,7 +12,7 @@ A machine learning project that predicts the likelihood of loan approval based o
 ---
 
 ## 🌐 Live Demo  
-[APIendpoint](https://customer-loan-verification.onrender.com/docs)  
+[API endpoint](https://customer-loan-verification.onrender.com/docs)  
 
 ---
 
