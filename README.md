@@ -47,8 +47,7 @@ The backend is implemented using FastAPI, while the frontend is an HTML form sty
 ### Steps to Set Up Locally  
 1. **Clone the repository:**  
    ```bash
-   git clone https://github.com/your-username/loan-eligibility-prediction.git
-   cd loan-eligibility-prediction
+   https://github.com/Emmanuel-Begati/Customer-Loan_Verification/
    ```
 
 2. **Install dependencies:**  
@@ -79,12 +78,12 @@ Results show the application is capable of handling high traffic efficiently.
 
 ## 📁 Notebook  
 
-All preprocessing, model training, and evaluation steps are included in the Jupyter notebook provided in the repository.  
+All preprocessing, model training and evaluation steps are included in the Jupyter Notebook provided in the repository.  
 
 ### Key Sections in the Notebook  
 1. **Preprocessing Functions:** Functions for data cleaning and feature engineering.  
 2. **Model Training:** Logistic regression and performance evaluation.  
-3. **Model Testing and Prediction:** Functions to make predictions on new data.
+3. **Model Testing and Prediction:** Functions to predict new data.
 
 ---
 
@@ -104,7 +103,7 @@ with open('models/loan_model.pkl', 'rb') as file:
 ## 📦 Deployment Package  
 
 ### Option 1: Public URL + Docker Image  
-The project can be deployed as a containerized application using Docker.  
+The project can be deployed as a containerized application using Docker. Although I deployed the API using render 
 
 **Build and run the Docker image:**  
 ```bash
@@ -132,6 +131,6 @@ This project is licensed under the MIT License.
 ### 📧 Contact  
 
 For inquiries or issues, contact:  
-[Your Email](mailto:your-email@example.com)
+[Your Email](mailto:begati16@gmail.com)
 
 ---
