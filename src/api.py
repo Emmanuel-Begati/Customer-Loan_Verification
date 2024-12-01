@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
 from pydantic import BaseModel
 import pandas as pd
 from src.preprocessing import load_scaler, preprocess_data
@@ -8,6 +8,8 @@ from sklearn.model_selection import train_test_split
 import joblib
 import os
 import csv
+from io import StringIO
+from fastapi.middleware.cors import CORSMiddleware
 
 # Paths to model, scaler, and data
 MODEL_PATH = "models/loan_model.pkl"
@@ -20,6 +22,21 @@ scaler = load_scaler(SCALER_PATH)
 
 # FastAPI app initialization
 app = FastAPI()
+
+# CORS configuration
+origins = [
+    "http://localhost",  # Allow the frontend to access the backend
+    "http://localhost:3000",  # Replace with your frontend's actual URL if needed
+    "*",  # Allow all origins (use cautiously in production)
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Define the Pydantic model for loan application input
 class LoanApplication(BaseModel):
@@ -82,6 +99,44 @@ async def predict_loan(features: LoanApplication):
         return {"prediction": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.post("/predict_bulk/")
+async def predict_bulk(file: UploadFile = File(...)):
+    try:
+        # Read the uploaded CSV file
+        contents = await file.read()
+        df = pd.read_csv(StringIO(contents.decode("utf-8")))
+        
+        # Ensure the file has the expected columns
+        required_columns = [
+            "Gender", "Married", "Dependents", "Education", "Self_Employed", "ApplicantIncome", 
+            "CoapplicantIncome", "LoanAmount", "Loan_Amount_Term", "Credit_History", "Property_Area"
+        ]
+        
+        for col in required_columns:
+            if col not in df.columns:
+                raise HTTPException(status_code=400, detail=f"Missing required column: {col}")
+        
+        predictions = []
+        for index, row in df.iterrows():
+            # Preprocess each row
+            features = row.to_dict()
+            input_data = preprocess_input(features)
+            preprocessed_data = preprocess_data(input_data, scaler)
+            prediction = predict(model, preprocessed_data)
+            result = "Approved" if prediction[0] == 1 else "Rejected"
+            
+            # Append the result to predictions list
+            predictions.append({**features, "Loan_Status": result})
+
+            # Log the prediction data
+            log_data = {**features, "Loan_Status": prediction[0]}
+            log_prediction(log_data)
+        
+        return {"predictions": predictions}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/retrain/")
 async def retrain_model():
