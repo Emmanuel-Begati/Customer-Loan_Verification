@@ -7,12 +7,14 @@ A machine learning project that predicts the likelihood of loan approval based o
 ---
 
 ## 📽 Video Demo  
-[Watch the Demo](https://www.youtube.com/your-demo-link)  
+[Watch the Demo](https://youtu.be/KQSfEF7-7LU)  
 
 ---
 
 ## 🌐 Live Demo  
 [API endpoint](https://customer-loan-verification.onrender.com/docs)  
+
+adding the other links soon...stay tuned...
 
 ---
 
