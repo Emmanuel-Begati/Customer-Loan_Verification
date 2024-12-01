@@ -10,6 +10,7 @@
             background-color: #f4f7fc;
             margin: 0;
             padding: 0;
+            line-height: 1.6;
         }
         .container {
             max-width: 600px;
@@ -21,10 +22,12 @@
         }
         h1 {
             text-align: center;
+            color: #333;
         }
         label {
             margin-top: 10px;
             display: block;
+            font-weight: bold;
         }
         input, select {
             width: 100%;
@@ -41,48 +44,17 @@
             cursor: pointer;
             border-radius: 4px;
             width: 100%;
+            margin-top: 15px;
         }
         button:hover {
             background-color: #45a049;
-        }
-
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .modal-content h2 {
-            margin-bottom: 20px;
-            color: #333;
-        }
-        .close-modal {
-            width: auto;
-            margin-top: 15px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Loan Prediction</h1>
-        <form id="loanForm">
+        <form id="loanForm" action="result.html" method="POST">
             <label for="Gender">Gender</label>
             <select id="Gender" name="Gender" required>
                 <option value="Male">Male</option>
@@ -135,69 +107,40 @@
                 <option value="Rural">Rural</option>
             </select>
 
-            <button type="submit">Submit</button>
+            <button type="submit">Get Loan Prediction</button>
         </form>
     </div>
 
-    <!-- Modal -->
-    <div id="predictionModal" class="modal">
-        <div class="modal-content">
-            <h2>Loan Prediction Result</h2>
-            <p id="modalPredictionResult"></p>
-            <button id="closeModalBtn" class="close-modal">Close</button>
-        </div>
-    </div>
-
     <script>
-        // Wait for the DOM to be fully loaded
-        document.addEventListener('DOMContentLoaded', function() {
-            const loanForm = document.getElementById("loanForm");
-            const predictionModal = document.getElementById("predictionModal");
-            const modalContent = predictionModal.querySelector(".modal-content");
-            const modalPredictionResult = document.getElementById("modalPredictionResult");
-            const closeModalBtn = document.getElementById("closeModalBtn");
-
-            // Form submission event listener
-            loanForm.addEventListener("submit", async function(event) {
-                event.preventDefault();
+        document.getElementById('loanForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
             
-                // Collect form data
-                const formData = new FormData(event.target);
-                const data = Object.fromEntries(formData.entries());
+            // Collect form data
+            const formData = new FormData(event.target);
+            const data = Object.fromEntries(formData.entries());
+        
+            try {
+                // Send request to FastAPI backend for prediction
+                const response = await fetch("http://localhost:8000/predict/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(data),
+                });
             
-                try {
-                    // Send request to FastAPI backend for prediction
-                    const response = await fetch("http://localhost:8000/predict/", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        body: JSON.stringify(data),
-                    });
+                const result = await response.json();
                 
-                    const result = await response.json();
-                    
-                    // Show the modal with prediction result
-                    modalPredictionResult.textContent = `Loan Prediction: ${result.prediction}`;
-                    predictionModal.style.display = "block";
-                } catch (error) {
-                    console.error("Error:", error);
-                    alert("An error occurred while fetching the prediction.");
-                }
-            });
-            
-            // Close modal button functionality
-            closeModalBtn.addEventListener("click", function() {
-                predictionModal.style.display = "none";
-            });
+                // Store prediction in localStorage to pass to result page
+                localStorage.setItem('loanPrediction', JSON.stringify(result));
+                
+                // Redirect to result page
+                window.location.href = 'result.html';
 
-            // Close modal if clicking outside the modal content
-            predictionModal.addEventListener("click", function(event) {
-                // Check if the click is on the modal background (outside the modal content)
-                if (event.target === predictionModal) {
-                    predictionModal.style.display = "none";
-                }
-            });
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred while fetching the prediction.");
+            }
         });
     </script>
 </body>
