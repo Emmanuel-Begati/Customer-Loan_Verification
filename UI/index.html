@@ -45,10 +45,37 @@
         button:hover {
             background-color: #45a049;
         }
-        .response {
-            margin-top: 20px;
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
             text-align: center;
-            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .close-modal {
+            width: auto;
+            margin-top: 15px;
         }
     </style>
 </head>
@@ -110,28 +137,67 @@
 
             <button type="submit">Submit</button>
         </form>
-        <div id="predictionResult" class="response"></div>
+    </div>
+
+    <!-- Modal -->
+    <div id="predictionModal" class="modal">
+        <div class="modal-content">
+            <h2>Loan Prediction Result</h2>
+            <p id="modalPredictionResult"></p>
+            <button id="closeModalBtn" class="close-modal">Close</button>
+        </div>
     </div>
 
     <script>
-        document.getElementById("loanForm").addEventListener("submit", async function(event) {
-            event.preventDefault();
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const loanForm = document.getElementById("loanForm");
+            const predictionModal = document.getElementById("predictionModal");
+            const modalContent = predictionModal.querySelector(".modal-content");
+            const modalPredictionResult = document.getElementById("modalPredictionResult");
+            const closeModalBtn = document.getElementById("closeModalBtn");
 
-            // Collect form data
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData.entries());
-
-            // Send request to FastAPI backend for prediction
-            const response = await fetch("http://localhost:8000/predict/", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(data),
+            // Form submission event listener
+            loanForm.addEventListener("submit", async function(event) {
+                event.preventDefault();
+            
+                // Collect form data
+                const formData = new FormData(event.target);
+                const data = Object.fromEntries(formData.entries());
+            
+                try {
+                    // Send request to FastAPI backend for prediction
+                    const response = await fetch("http://localhost:8000/predict/", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(data),
+                    });
+                
+                    const result = await response.json();
+                    
+                    // Show the modal with prediction result
+                    modalPredictionResult.textContent = `Loan Prediction: ${result.prediction}`;
+                    predictionModal.style.display = "block";
+                } catch (error) {
+                    console.error("Error:", error);
+                    alert("An error occurred while fetching the prediction.");
+                }
+            });
+            
+            // Close modal button functionality
+            closeModalBtn.addEventListener("click", function() {
+                predictionModal.style.display = "none";
             });
 
-            const result = await response.json();
-            document.getElementById("predictionResult").innerText = `Loan Prediction: ${result.prediction}`;
+            // Close modal if clicking outside the modal content
+            predictionModal.addEventListener("click", function(event) {
+                // Check if the click is on the modal background (outside the modal content)
+                if (event.target === predictionModal) {
+                    predictionModal.style.display = "none";
+                }
+            });
         });
     </script>
 </body>
