@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, File, UploadFile
+from fastapi import FastAPI, HTTPException, File, UploadFile, Request
 from pydantic import BaseModel
 import pandas as pd
 from src.preprocessing import load_scaler, preprocess_data
@@ -10,6 +10,8 @@ import os
 import csv
 from io import StringIO
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
 
 # Paths to model, scaler, and data
 MODEL_PATH = "models/loan_model.pkl"
@@ -78,10 +80,12 @@ def log_prediction(data: dict):
         if not file_exists:
             writer.writeheader()
         writer.writerow(data)
+        
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), '..', 'UI'))
 
-@app.get("/")
-def root():
-    return {"message": "Welcome to the Loan Prediction API"}
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request, "title": "Welcome to the Loan Prediction API"})
 
 @app.post("/predict/")
 async def predict_loan(features: LoanApplication):
