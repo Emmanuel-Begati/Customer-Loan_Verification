@@ -121,7 +121,7 @@
         
             try {
                 // Send request to FastAPI backend for prediction
-                const response = await fetch("https://customer-loan-verification-api.onrender.com", {
+                const response = await fetch("https://customer-loan-verification-api.onrender.com/predict", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
