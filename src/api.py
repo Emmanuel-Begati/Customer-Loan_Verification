@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, File, UploadFile, Request
+from fastapi import FastAPI, HTTPException, File, UploadFile, Request, Form
 from pydantic import BaseModel
 import pandas as pd
 from src.preprocessing import load_scaler, preprocess_data
@@ -87,11 +87,43 @@ templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), '.
 async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "title": "Welcome to the Loan Prediction API"})
 
+@app.get("/predict", response_class=HTMLResponse)
+async def get_predict_form(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request, "title": "Loan Prediction Form"})
+
 @app.post("/predict/")
-async def predict_loan(features: LoanApplication, request: Request):
+async def predict_loan(
+    request: Request,
+    Gender: str = Form(...),
+    Married: str = Form(...),
+    Dependents: int = Form(...),
+    Education: str = Form(...),
+    Self_Employed: str = Form(...),
+    ApplicantIncome: float = Form(...),
+    CoapplicantIncome: float = Form(...),
+    LoanAmount: float = Form(...),
+    Loan_Amount_Term: int = Form(...),
+    Credit_History: int = Form(...),
+    Property_Area: str = Form(...)
+):
     try:
+        # Create a dictionary of form data
+        features = {
+            "Gender": Gender,
+            "Married": Married,
+            "Dependents": Dependents,
+            "Education": Education,
+            "Self_Employed": Self_Employed,
+            "ApplicantIncome": ApplicantIncome,
+            "CoapplicantIncome": CoapplicantIncome,
+            "LoanAmount": LoanAmount,
+            "Loan_Amount_Term": Loan_Amount_Term,
+            "Credit_History": Credit_History,
+            "Property_Area": Property_Area
+        }
+
         # Preprocess input features
-        input_data = preprocess_input(features.dict())
+        input_data = preprocess_input(features)
         preprocessed_data = preprocess_data(input_data, scaler)
         
         # Predict the loan status
@@ -99,7 +131,7 @@ async def predict_loan(features: LoanApplication, request: Request):
         result = "Approved" if prediction[0] == 1 else "Rejected"
         
         # Log the prediction data
-        log_data = {**features.dict(), "Loan_Status": prediction[0]}
+        log_data = {**features, "Loan_Status": prediction[0]}
         log_prediction(log_data)
         
         # Render the result.html template with the prediction result

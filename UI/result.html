@@ -53,40 +53,16 @@
 <body>
     <div class="result-container">
         <h1>Loan Prediction Result</h1>
-        <div id="predictionResultText" class="prediction-result"></div>
-        <button id="tryAgainBtn" onclick="window.location.href='index.html'">Try Different Information</button>
+        <div id="predictionResultText" class="prediction-result">
+            {% if prediction == "Approved" %}
+                Yay! You're eligible for a loan!
+            {% elif prediction == "Rejected" %}
+                Sorry! You're less likely to get a loan.
+            {% else %}
+                No prediction available.
+            {% endif %}
+        </div>
+        <button onclick="window.location.href='/';">Try Different Information</button>
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const resultElement = document.getElementById('predictionResultText');
-            
-            // Retrieve prediction from localStorage
-            const savedResult = localStorage.getItem('loanPrediction');
-            
-            if (savedResult) {
-                const result = JSON.parse(savedResult);
-                
-                // Set prediction result text and styling
-                let message = '';
-                if (result.prediction.toLowerCase() === "approved") {
-                    message = "Yay! You're eligible for a loan!";
-                    resultElement.classList.add("approved");
-                } else {
-                    message = "Sorry! You're less likely to get a loan.";
-                    resultElement.classList.add("rejected");
-                }
-    
-                resultElement.textContent = message;
-                
-                // Clear the stored prediction
-                localStorage.removeItem('loanPrediction');
-            } else {
-                resultElement.textContent = 'No prediction available';
-                resultElement.classList.add('rejected');
-            }
-        });
-    </script>
-    
 </body>
 </html>
