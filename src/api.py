@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException, File, UploadFile, Request
 from pydantic import BaseModel
 import pandas as pd
-from preprocessing import load_scaler, preprocess_data
-from model import load_model, predict
+from src.preprocessing import load_scaler, preprocess_data
+from src.model import load_model, predict
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 import joblib
