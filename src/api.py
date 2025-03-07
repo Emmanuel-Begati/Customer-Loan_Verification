@@ -88,19 +88,23 @@ async def root(request: Request):
     return templates.TemplateResponse("index.html", {"request": request, "title": "Welcome to the Loan Prediction API"})
 
 @app.post("/predict/")
-async def predict_loan(features: LoanApplication):
+async def predict_loan(features: LoanApplication, request: Request):
     try:
+        # Preprocess input features
         input_data = preprocess_input(features.dict())
         preprocessed_data = preprocess_data(input_data, scaler)
+        
+        # Predict the loan status
         prediction = predict(model, preprocessed_data)
-        print(preprocessed_data)
         result = "Approved" if prediction[0] == 1 else "Rejected"
         
         # Log the prediction data
         log_data = {**features.dict(), "Loan_Status": prediction[0]}
         log_prediction(log_data)
+        
+        # Render the result.html template with the prediction result
+        return templates.TemplateResponse("result.html", {"request": request, "prediction": result})
 
-        return {"prediction": result}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
