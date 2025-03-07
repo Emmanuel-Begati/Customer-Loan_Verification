@@ -54,7 +54,7 @@
 <body>
     <div class="container">
         <h1>Loan Prediction</h1>
-        <form id="loanForm" action="result.html" method="POST">
+        <form id="loanForm" action="UI/result.html" method="POST">
             <label for="Gender">Gender</label>
             <select id="Gender" name="Gender" required>
                 <option value="Male">Male</option>
@@ -135,7 +135,7 @@
                 localStorage.setItem('loanPrediction', JSON.stringify(result));
                 
                 // Redirect to result page
-                window.location.href = 'result.html';
+                window.location.href = 'UI/result.html';
 
             } catch (error) {
                 console.error("Error:", error);
